@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.Delete
@@ -18,12 +19,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.ImmutableList
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
 fun ExtensionReposContent(
-    repos: ImmutableSet<String>,
+    repos: ImmutableList<String>,
     lazyListState: LazyListState,
     paddingValues: PaddingValues,
     onClickDelete: (String) -> Unit,
@@ -35,14 +36,12 @@ fun ExtensionReposContent(
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
         modifier = modifier,
     ) {
-        repos.forEach {
-            item {
-                ExtensionRepoListItem(
-                    modifier = Modifier.animateItemPlacement(),
-                    repo = it,
-                    onDelete = { onClickDelete(it) },
-                )
-            }
+        items(repos) { repo ->
+            ExtensionRepoListItem(
+                modifier = Modifier.animateItemPlacement(),
+                repo = repo,
+                onDelete = { onClickDelete(repo) },
+            )
         }
     }
 }

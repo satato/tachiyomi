@@ -1,9 +1,9 @@
-package eu.kanade.domain.extension.interactor
+package eu.kanade.domain.source.interactor
 
 import eu.kanade.domain.source.service.SourcePreferences
 import tachiyomi.core.preference.plusAssign
 
-class CreateExtensionRepo(private val preferences: SourcePreferences) {
+class CreateSourceRepo(private val preferences: SourcePreferences) {
 
     fun await(name: String): Result {
         // Do not allow invalid formats

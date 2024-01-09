@@ -52,7 +52,7 @@ class ExtensionReposScreen(
                 ExtensionRepoCreateDialog(
                     onDismissRequest = screenModel::dismissDialog,
                     onCreate = { screenModel.createRepo(it) },
-                    repos = successState.repos,
+                    categories = successState.repos,
                 )
             }
             is RepoDialog.Delete -> {
