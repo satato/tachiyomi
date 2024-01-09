@@ -27,8 +27,10 @@ sealed class Extension {
         val icon: Drawable?,
         val hasUpdate: Boolean = false,
         val isObsolete: Boolean = false,
+        val isUnofficial: Boolean = false,
         val isShared: Boolean,
         val repoUrl: String? = null,
+        val isFromExternalRepo: Boolean = false,
     ) : Extension()
 
     data class Available(
@@ -43,6 +45,7 @@ sealed class Extension {
         val apkName: String,
         val iconUrl: String,
         val repoUrl: String,
+        val isFromExternalRepo: Boolean,
     ) : Extension() {
 
         data class Source(

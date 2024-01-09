@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension.api
 
 import android.content.Context
+import eu.kanade.domain.source.interactor.OFFICIAL_REPO_BASE_URL
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -35,11 +36,14 @@ internal class ExtensionApi {
 
     suspend fun findExtensions(): List<Extension.Available> {
         return withIOContext {
-            val extensions = sourcePreferences.extensionRepos().get().flatMap { getExtensions(it) }
+            val extensions = buildList {
+                addAll(getExtensions(OFFICIAL_REPO_BASE_URL, true))
+                sourcePreferences.extensionRepos().get().map { addAll(getExtensions(it, false)) }
+            }
 
             // Sanity check - a small number of extensions probably means something broke
             // with the repo generator
-            if (extensions.isEmpty()) {
+            if (extensions.size < 50) {
                 throw Exception()
             }
 
@@ -47,7 +51,10 @@ internal class ExtensionApi {
         }
     }
 
-    private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> {
+    private suspend fun getExtensions(
+        repoBaseUrl: String,
+        isOfficialRepo: Boolean,
+    ): List<Extension.Available> {
         return try {
             val response = networkService.client
                 .newCall(GET("$repoBaseUrl/index.min.json"))
@@ -56,7 +63,7 @@ internal class ExtensionApi {
             with(json) {
                 response
                     .parseAs<List<ExtensionJsonObject>>()
-                    .toExtensions(repoBaseUrl)
+                    .toExtensions(repoBaseUrl, isRepoSource = !isOfficialRepo)
             }
         } catch (e: Throwable) {
             logcat(LogPriority.ERROR, e) { "Failed to get extensions from $repoBaseUrl" }
@@ -91,7 +98,7 @@ internal class ExtensionApi {
             val availableExt = extensions.find { it.pkgName == pkgName } ?: continue
             val hasUpdatedVer = availableExt.versionCode > installedExt.versionCode
             val hasUpdatedLib = availableExt.libVersion > installedExt.libVersion
-            val hasUpdate = hasUpdatedVer || hasUpdatedLib
+            val hasUpdate = installedExt.isUnofficial.not() && (hasUpdatedVer || hasUpdatedLib)
             if (hasUpdate) {
                 extensionsWithUpdate.add(installedExt)
             }
@@ -104,7 +111,10 @@ internal class ExtensionApi {
         return extensionsWithUpdate
     }
 
-    private fun List<ExtensionJsonObject>.toExtensions(repoUrl: String): List<Extension.Available> {
+    private fun List<ExtensionJsonObject>.toExtensions(
+        repoUrl: String,
+        isRepoSource: Boolean,
+    ): List<Extension.Available> {
         return this
             .filter {
                 val libVersion = it.extractLibVersion()
@@ -123,6 +133,7 @@ internal class ExtensionApi {
                     apkName = it.apk,
                     iconUrl = "$repoUrl/icon/${it.pkg}.png",
                     repoUrl = repoUrl,
+                    isFromExternalRepo = isRepoSource,
                 )
             }
     }

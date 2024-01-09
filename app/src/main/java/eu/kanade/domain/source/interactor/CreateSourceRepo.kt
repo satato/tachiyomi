@@ -7,7 +7,7 @@ class CreateSourceRepo(private val preferences: SourcePreferences) {
 
     fun await(name: String): Result {
         // Do not allow invalid formats
-        if (!name.matches(repoRegex)) {
+        if (!name.matches(repoRegex) || name.startsWith(OFFICIAL_REPO_BASE_URL)) {
             return Result.InvalidUrl
         }
 
@@ -22,4 +22,5 @@ class CreateSourceRepo(private val preferences: SourcePreferences) {
     }
 }
 
+const val OFFICIAL_REPO_BASE_URL = "https://raw.githubusercontent.com/tachiyomiorg/tachiyomi-extensions/repo"
 private val repoRegex = """^https://.*/index\.min\.json$""".toRegex()
