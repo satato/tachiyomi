@@ -48,7 +48,4 @@
     <plurals name="day">
         <item quantity="other">%d วัน</item>
     </plurals>
-    <plurals name="num_repos">
-        <item quantity="other">%d รีโพ</item>
-    </plurals>
 </resources>
